@@ -28,19 +28,19 @@ client.on('messageCreate', async message => {
     const command = args[0].toLowerCase();
     
     switch (command) {
-        case '/start':
+        case 't!start':
             await handleStartCommand(message);
             break;
-        case '/break-start':
+        case 't!break-start':
             await handleBreakStartCommand(message);
             break;
-        case '/break-end':
+        case 't!break-end':
             await handleBreakEndCommand(message);
             break;
-        case '/end':
+        case 't!end':
             await handleEndCommand(message);
             break;
-        case '/status':
+        case 't!status':
             await handleStatusCommand(message);
             break;
     }
