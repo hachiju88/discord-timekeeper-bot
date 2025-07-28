@@ -29,7 +29,6 @@ client.on('messageCreate', async message => {
     
     switch (command) {
         case 't!':
-            await message.delete();
             await handleHelpCommand(message);
             break;
         case 't!start':
@@ -56,15 +55,12 @@ client.on('interactionCreate', async interaction => {
     if (interaction.customId === 'timekeeper_commands') {
         const command = interaction.values[0];
         
-        // セレクトメニューのメッセージを削除
-        await interaction.message.delete();
-        
         // メッセージオブジェクトを作成（既存の関数と互換性を保つため）
         const mockMessage = {
             author: interaction.user,
             channel: interaction.channel,
             reply: async (content) => {
-                await interaction.channel.send(content);
+                await interaction.reply(content);
             }
         };
         
