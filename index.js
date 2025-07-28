@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, ActionRowBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder } = require('discord.js');
 const moment = require('moment-timezone');
 
 const client = new Client({
@@ -28,6 +28,9 @@ client.on('messageCreate', async message => {
     const command = args[0].toLowerCase();
     
     switch (command) {
+        case 't!':
+            await handleHelpCommand(message);
+            break;
         case 't!start':
             await handleStartCommand(message);
             break;
@@ -43,6 +46,41 @@ client.on('messageCreate', async message => {
         case 't!status':
             await handleStatusCommand(message);
             break;
+    }
+});
+
+client.on('interactionCreate', async interaction => {
+    if (!interaction.isStringSelectMenu()) return;
+    
+    if (interaction.customId === 'timekeeper_commands') {
+        const command = interaction.values[0];
+        
+        // メッセージオブジェクトを作成（既存の関数と互換性を保つため）
+        const mockMessage = {
+            author: interaction.user,
+            channel: interaction.channel,
+            reply: async (content) => {
+                await interaction.reply(content);
+            }
+        };
+        
+        switch (command) {
+            case 'start':
+                await handleStartCommand(mockMessage);
+                break;
+            case 'break-start':
+                await handleBreakStartCommand(mockMessage);
+                break;
+            case 'break-end':
+                await handleBreakEndCommand(mockMessage);
+                break;
+            case 'end':
+                await handleEndCommand(mockMessage);
+                break;
+            case 'status':
+                await handleStatusCommand(mockMessage);
+                break;
+        }
     }
 });
 
@@ -202,6 +240,46 @@ async function checkDateChange() {
         
         timeData.clear();
     }
+}
+
+async function handleHelpCommand(message) {
+    const selectMenu = new StringSelectMenuBuilder()
+        .setCustomId('timekeeper_commands')
+        .setPlaceholder('実行したいコマンドを選択してください')
+        .addOptions(
+            new StringSelectMenuOptionBuilder()
+                .setLabel('業務開始')
+                .setDescription('勤怠記録を開始します')
+                .setValue('start')
+                .setEmoji('🟢'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('休憩開始')
+                .setDescription('休憩時間の記録を開始します')
+                .setValue('break-start')
+                .setEmoji('☕'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('休憩終了')
+                .setDescription('休憩時間の記録を終了します')
+                .setValue('break-end')
+                .setEmoji('🔄'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('業務終了')
+                .setDescription('勤怠記録を終了し、結果を表示します')
+                .setValue('end')
+                .setEmoji('🔴'),
+            new StringSelectMenuOptionBuilder()
+                .setLabel('現在の状況')
+                .setDescription('現在の勤務状況を確認します')
+                .setValue('status')
+                .setEmoji('📊')
+        );
+
+    const row = new ActionRowBuilder().addComponents(selectMenu);
+
+    await message.reply({
+        content: '📋 **勤怠管理ボット** - 実行したいコマンドを選択してください',
+        components: [row]
+    });
 }
 
 client.login(process.env.DISCORD_TOKEN);
