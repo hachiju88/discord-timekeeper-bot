@@ -12,7 +12,7 @@ const client = new Client({
 
 const timeData = new Map();
 
-client.once('ready', () => {
+client.once('clientReady', () => {
     console.log(`勤怠管理ボット ${client.user.tag} がオンラインになりました！`);
     
     setInterval(() => {
